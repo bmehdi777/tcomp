@@ -4,7 +4,7 @@ import "github.com/spf13/cobra"
 
 func newCmdRoot() *cobra.Command {
 	rootCmd := cobra.Command {
-		Use: "tmuxcompose",
+		Use: "tcompose",
 		Short: "Compose your tmux environment",
 	}
 
