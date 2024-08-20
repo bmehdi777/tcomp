@@ -1,5 +1,5 @@
 build:
-	go build -o bin/tmuxcompose cmd/tmuxcompose/main.go
+	go build -o bin/tcomp cmd/tmuxcompose/main.go
 
 clean:
 	rm bin/*
