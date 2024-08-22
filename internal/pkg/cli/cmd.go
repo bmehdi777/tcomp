@@ -20,7 +20,7 @@ func newCmdRoot() *cobra.Command {
 		os.Exit(1)
 	}
 
-	fmt.Println("Config", config)
+	_ = tmux.Tmux { Conf: config }
 
 	return &rootCmd
 }
