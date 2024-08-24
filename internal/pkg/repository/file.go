@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/bmehdi777/tmuxcompose/internal/pkg/tmux"
@@ -18,7 +19,8 @@ func ListRepository(config *tmux.Config) ([]string, error) {
 	var filesNames []string
 	for _, file := range files {
 		if !file.IsDir() {
-			filesNames = append(filesNames, file.Name())
+			fileName := file.Name()
+			filesNames = append(filesNames, strings.TrimSuffix(fileName, filepath.Ext(fileName)))
 		}
 	}
 
