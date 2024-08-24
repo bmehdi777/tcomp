@@ -1,6 +1,8 @@
 ---
 session: api
 
+cwd: /
+
 before: 
   - ls
 stop: 
@@ -13,30 +15,13 @@ follow: true
 
 windows:
     - name: "first"
-      cwd: "./"
+      cwd: "."
       panes:
         - type: horizontal
-          cwd: "."
           commands:
             - ls
             - zsh
         - type: vertical
-          cwd: "."
           commands:
             - ls
             - zsh
-    - name: "second"
-      cwd: "./"
-      panes:
-        - type: horizontal
-          cwd: "."
-          commands:
-            - ls
-            - zsh
-        - type: vertical
-          cwd: "."
-          commands:
-            - ls
-            - zsh
-    
-    

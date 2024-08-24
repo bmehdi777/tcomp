@@ -24,7 +24,7 @@ func Execute() error {
 
 func checkGenericError(err error) {
 	if err != nil {
-		fmt.Println("Error : ", err)
+		fmt.Println("Error :", err)
 		os.Exit(1)
 	}
 }
