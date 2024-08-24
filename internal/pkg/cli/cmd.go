@@ -26,9 +26,14 @@ func newCmdRoot() *cobra.Command {
 	fmt.Println("repo", repo)
 
 	tmux := tmux.Tmux{Config: config}
-	err = tmux.NewWindow("TEssssssssssssst").SetCWD("/").Execute()
+	err = tmux.NewWindow("TEssssssssssssst 2").Execute("ls", "zsh")
 	checkGenericError(err)
 
+	err = tmux.NewSplitPaneVertical().Execute("echo hello","zsh")
+	checkGenericError(err)
+
+	err = tmux.NewSplitPaneHorizontal().Execute()
+	checkGenericError(err)
 
 	return &rootCmd
 }

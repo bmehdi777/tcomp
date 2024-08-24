@@ -26,9 +26,6 @@ func (t *Tmux) NewSession(name string) *TmuxCommand {
 }
 
 func (t *Tmux) NewWindow(name string) *TmuxCommand {
-	name = strings.ReplaceAll(name, "'", "\\'")
-	name = "'" + name + "'"
-
 	cmd := TmuxCommand{
 		conf:    t.Config,
 		command: "new-window",
@@ -70,14 +67,14 @@ func (tc *TmuxCommand) SetEnv(envs map[string]string) *TmuxCommand {
 
 func (tc *TmuxCommand) Execute(programs ...string) error {
 	for _, program := range programs {
-		program = strings.ReplaceAll(program, "'", "\\'")
+		program = strings.ReplaceAll(program, "\"", "\\\"")
 	}
 
 	fullParam := append([]string{"-S", tc.conf.TmuxSocketPath, tc.command}, tc.params...)
 
 	fullProgram := ""
 	if len(programs) > 0 {
-		fullProgram = "'" + strings.Join(programs, ";") + "'"
+		fullProgram = strings.Join(programs, "; ")
 		fullParam = append(fullParam, fullProgram)
 	}
 
