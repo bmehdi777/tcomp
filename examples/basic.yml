@@ -9,6 +9,8 @@ stop:
 env:
   VAR: env
 
+follow: true
+
 windows:
     - name: "first"
       cwd: "./"
@@ -23,4 +25,18 @@ windows:
           commands:
             - ls
             - zsh
+    - name: "second"
+      cwd: "./"
+      panes:
+        - type: horizontal
+          cwd: "."
+          commands:
+            - ls
+            - zsh
+        - type: vertical
+          cwd: "."
+          commands:
+            - ls
+            - zsh
+    
     

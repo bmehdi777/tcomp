@@ -1,6 +1,7 @@
 package tmux
 
 import (
+	"errors"
 	"os/exec"
 	"strings"
 )
@@ -23,6 +24,17 @@ func (t *Tmux) NewSession(name string) *TmuxCommand {
 		conf:      t.Config,
 		command:   "new-session",
 		params:    []string{"-ds", name},
+		globalEnv: t.Envs,
+	}
+
+	return &cmd
+}
+
+func (t *Tmux) FollowSession(sessionName string) *TmuxCommand {
+	cmd := TmuxCommand{
+		conf:      t.Config,
+		command:   "switch",
+		params:    []string{"-t", sessionName},
 		globalEnv: t.Envs,
 	}
 
@@ -112,8 +124,8 @@ func (tc *TmuxCommand) Execute(programs ...string) error {
 	if len(envs) > 0 {
 		cmd.Env = envs
 	}
-	if err := cmd.Run(); err != nil {
-		return err
+	if stdoutStderr, err := cmd.CombinedOutput(); err != nil {
+		return errors.New(string(stdoutStderr))
 	}
 
 	return nil

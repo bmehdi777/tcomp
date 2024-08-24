@@ -12,6 +12,7 @@ type Repository struct {
 	Stop    []string          `yaml:"stop,omitempty"`
 	Env     map[string]string `yaml:"env,omitempty"`
 	Windows []RepoWindow      `yaml:"windows"`
+	Follow  bool              `yaml:"follow,omitempty"`
 }
 
 type RepoWindow struct {
@@ -87,7 +88,13 @@ func (repo *Repository) ParseToTmux(config *Config) error {
 			}
 
 		}
+	}
 
+	if repo.Follow {
+		err := tmux.FollowSession(repo.Session + ":0").Execute()
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
