@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/bmehdi777/tmuxcompose/internal/pkg/tmux"
 	"github.com/spf13/cobra"
 )
 
@@ -14,26 +13,7 @@ func newCmdRoot() *cobra.Command {
 		Short: "Compose your tmux environment",
 	}
 
-	config, err := tmux.NewConfig()
-	if err != nil {
-		fmt.Println("Error : ", err)
-		os.Exit(1)
-	}
-
-	repo, err := tmux.ReadRepository("./examples/basic.yml")
-	checkGenericError(err)
-
-	fmt.Println("repo", repo)
-
-	tmux := tmux.Tmux{Config: config}
-	err = tmux.NewWindow("TEssssssssssssst 2").Execute("ls", "zsh")
-	checkGenericError(err)
-
-	err = tmux.NewSplitPaneVertical().Execute("echo hello","zsh")
-	checkGenericError(err)
-
-	err = tmux.NewSplitPaneHorizontal().Execute()
-	checkGenericError(err)
+	rootCmd.AddCommand(newCmdUp())
 
 	return &rootCmd
 }
