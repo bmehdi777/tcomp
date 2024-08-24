@@ -11,7 +11,7 @@ type Repository struct {
 	Before  []string          `yaml:"before,omitempty"`
 	Stop    []string          `yaml:"stop,omitempty"`
 	Env     map[string]string `yaml:"env,omitempty"`
-	Windows []RepoWindow        `yaml:"windows"`
+	Windows []RepoWindow      `yaml:"windows"`
 }
 
 type RepoWindow struct {
@@ -46,4 +46,49 @@ func ReadRepository(pathfile string) (Repository, error) {
 	}
 
 	return repo, nil
+}
+
+func (repo *Repository) ParseToTmux(config *Config) error {
+	tmux := Tmux{Config: config}
+
+	if repo.Env != nil {
+		tmux.Envs = &repo.Env
+	}
+
+	err := tmux.NewSession(repo.Session).Execute()
+	if err != nil {
+		return err
+	}
+
+	for index, repoWindow := range repo.Windows {
+		if index == 0 {
+			err := tmux.RenameWindow(repo.Session, "0", repoWindow.Name).Execute()
+			if err != nil {
+				return err
+			}
+		} else {
+			err := tmux.NewWindow(repo.Session, repoWindow.Name).SetCWD(repoWindow.Cwd).Execute()
+			if err != nil {
+				return err
+			}
+		}
+
+		for _, repoPane := range repoWindow.Panes {
+			if repoPane.Type == Horizontal {
+				err := tmux.NewSplitPaneHorizontal(repo.Session, repoWindow.Name).SetCWD(repoPane.Cwd).Execute(repoPane.Commands...)
+				if err != nil {
+					return err
+				}
+			} else {
+				err := tmux.NewSplitPaneVertical(repo.Session, repoWindow.Name).SetCWD(repoPane.Cwd).Execute(repoPane.Commands...)
+				if err != nil {
+					return err
+				}
+			}
+
+		}
+
+	}
+
+	return nil
 }

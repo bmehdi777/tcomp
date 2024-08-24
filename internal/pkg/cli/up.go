@@ -24,15 +24,8 @@ func handlerUp(cmd *cobra.Command, args []string) {
 	repo, err := tmux.ReadRepository("./examples/basic.yml")
 	checkGenericError(err)
 
-	fmt.Println("repo", repo)
-
-	tmux := tmux.Tmux{Config: config}
-	err = tmux.NewWindow("TEssssssssssssst 2").Execute("ls", "zsh")
+	err = repo.ParseToTmux(config)
 	checkGenericError(err)
 
-	err = tmux.NewSplitPaneVertical().Execute("echo hello", "zsh")
-	checkGenericError(err)
-
-	err = tmux.NewSplitPaneHorizontal().Execute()
-	checkGenericError(err)
+	fmt.Println("Session is up !")
 }
