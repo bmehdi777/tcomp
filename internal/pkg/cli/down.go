@@ -10,19 +10,20 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newCmdUp() *cobra.Command {
-	upCmd := cobra.Command{
-		Use:   "up [REPOSITORY]",
-		Short: "Start your tmux environment",
-		Run:   handlerUp,
+func newCmdDown() *cobra.Command {
+	downCmd := cobra.Command{
+		Use:   "down [REPOSITORY]",
+		Short: "Stop your tmux environment",
+		Run:   handlerDown,
+		Args:  cobra.RangeArgs(0, 1),
 	}
 
-	upCmd.PersistentFlags().StringP("file", "f", "", "Path to the repository's file")
+	downCmd.PersistentFlags().StringP("file", "f", "", "Path to the repository's file")
 
-	return &upCmd
+	return &downCmd
 }
 
-func handlerUp(cmd *cobra.Command, args []string) {
+func handlerDown(cmd *cobra.Command, args []string) {
 	config, err := tmux.NewConfig()
 	checkError(err)
 
@@ -45,9 +46,10 @@ func handlerUp(cmd *cobra.Command, args []string) {
 	}
 
 	repo, err := repository.ReadRepository(pathFile)
-
-	err = repo.StartTmuxEnv(config)
 	checkError(err)
 
-	fmt.Printf("Session %v is up !", repo.Session)
+	err = repo.StopTmuxEnv(config)
+	checkError(err)
+
+	fmt.Printf("Session %v is down.", repo.Session)
 }

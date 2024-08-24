@@ -46,6 +46,12 @@ func createDefaultConfig() error {
 		return err
 	}
 
+	repoPath := filepath.Join(configPath, "repository/")
+	err = os.MkdirAll(repoPath, os.ModePerm)
+	if err != nil {
+		return err
+	}
+
 	viper.Set("tmux_socket_path", "/tmp/tmux-1000/default")
 	viper.Set("compose_repository", filepath.Join(configPath, "/repository"))
 	fmt.Println("test")

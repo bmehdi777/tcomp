@@ -14,6 +14,7 @@ func newCmdRoot() *cobra.Command {
 	}
 
 	rootCmd.AddCommand(newCmdUp())
+	rootCmd.AddCommand(newCmdDown())
 
 	return &rootCmd
 }
@@ -22,7 +23,7 @@ func Execute() error {
 	return newCmdRoot().Execute()
 }
 
-func checkGenericError(err error) {
+func checkError(err error) {
 	if err != nil {
 		fmt.Println("Error :", err)
 		os.Exit(1)

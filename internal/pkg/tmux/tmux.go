@@ -41,6 +41,16 @@ func (t *Tmux) FollowSession(sessionName string) *TmuxCommand {
 	return &cmd
 }
 
+func (t *Tmux) KillSession(sessionName string) *TmuxCommand {
+	cmd := TmuxCommand{
+		conf: t.Config,
+		command: "kill-session",
+		params: []string{"-t", sessionName},
+	}
+
+	return &cmd
+}
+
 func (t *Tmux) NewWindow(sessionName string, name string) *TmuxCommand {
 	cmd := TmuxCommand{
 		conf:      t.Config,

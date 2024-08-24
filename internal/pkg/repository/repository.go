@@ -1,10 +1,11 @@
-package tmux
+package repository
 
 import (
 	"errors"
 	"fmt"
 	"os"
 
+	"github.com/bmehdi777/tmuxcompose/internal/pkg/tmux"
 	"gopkg.in/yaml.v3"
 )
 
@@ -83,8 +84,8 @@ func (repo *Repository) verifyRepository() error {
 	return nil
 }
 
-func (repo *Repository) ParseToTmux(config *Config) error {
-	tmux := Tmux{Config: config}
+func (repo *Repository) StartTmuxEnv(config *tmux.Config) error {
+	tmux := tmux.Tmux{Config: config}
 
 	if repo.Env != nil {
 		tmux.Envs = &repo.Env
@@ -153,6 +154,17 @@ func (repo *Repository) ParseToTmux(config *Config) error {
 		if err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (repo *Repository) StopTmuxEnv(config *tmux.Config) error {
+	tmux := tmux.Tmux{Config: config}
+
+	err := tmux.KillSession(repo.Session).Execute()
+	if err != nil {
+		return err
 	}
 
 	return nil
