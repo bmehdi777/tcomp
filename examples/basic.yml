@@ -1,0 +1,26 @@
+---
+session: api
+
+before: 
+  - cmd
+stop: 
+  - cmd
+
+env:
+  VAR: env
+
+windows:
+    - name: "first"
+      cwd: "./"
+      panes:
+        - type: horizontal
+          cwd: "."
+          commands:
+            - ls
+            - zsh
+        - type: horizontal
+          cwd: "."
+          commands:
+            - ls
+            - zsh
+    

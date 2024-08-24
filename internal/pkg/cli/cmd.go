@@ -14,13 +14,18 @@ func newCmdRoot() *cobra.Command {
 		Short: "Compose your tmux environment",
 	}
 
-	config, err := tmux.NewConfig()
+	_, err := tmux.NewConfig()
 	if err != nil {
 		fmt.Println("Error : ", err)
 		os.Exit(1)
 	}
 
-	_ = tmux.Tmux { Conf: config }
+	repo, err := tmux.ReadRepository("./examples/basic.yml")
+	if err != nil {
+		fmt.Println("Error : ", err)
+		os.Exit(1)
+	}
+	fmt.Println("repo", repo)
 
 	return &rootCmd
 }

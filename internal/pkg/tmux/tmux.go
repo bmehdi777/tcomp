@@ -23,6 +23,31 @@ func (t *Tmux) execCmd(param ...string) error {
 	return nil
 }
 
-func (t *Tmux) NewSession(name string) {
-	t.execCmd("new-session", "-ds", name)
+
+func (t *Tmux) NewSession(name string) error {
+	return t.execCmd("new-session", "-ds", name)
+}
+
+func (t *Tmux) NewWindow() error {
+	return t.execCmd("new-window")
+}
+
+func (t *Tmux) NewWindowWithCommand(programName string) error {
+	return t.execCmd("new-window", programName)
+}
+
+func (t *Tmux) SplitHorizontal() error {
+	return t.execCmd("split-window", "-h")
+}
+
+func (t *Tmux) SplitHorizontalWithCommand(programName string) error {
+	return t.execCmd("split-window", "-h", programName)
+}
+
+func (t *Tmux) SplitVertical() error {
+	return t.execCmd("split-window", "-v")
+}
+
+func (t *Tmux) SplitVerticalWithCommand(programName string) error {
+	return t.execCmd("split-window", "-v", programName)
 }
