@@ -1,19 +1,85 @@
 package tmux
 
 import (
-	"fmt"
 	"os/exec"
-	"slices"
+	"strings"
 )
 
 type Tmux struct {
-	Conf *Config
+	Config *Config
 }
 
-func (t *Tmux) execCmd(param ...string) error {
-	fullParam := slices.Insert(param, 0, "-S")
-	fullParam = slices.Insert(fullParam, 1, t.Conf.TmuxSocketPath)
-	fmt.Println("Full param", fullParam)
+type TmuxCommand struct {
+	conf    *Config
+	command string
+	params  []string
+}
+
+func (t *Tmux) NewSession(name string) *TmuxCommand {
+	cmd := TmuxCommand{
+		conf:    t.Config,
+		command: "new-session",
+		params:  []string{"-ds", name},
+	}
+
+	return &cmd
+}
+
+func (t *Tmux) NewWindow(name string) *TmuxCommand {
+	name = strings.ReplaceAll(name, "'", "\\'")
+	name = "'" + name + "'"
+
+	cmd := TmuxCommand{
+		conf:    t.Config,
+		command: "new-window",
+		params:  []string{"-n", name},
+	}
+
+	return &cmd
+}
+
+func (t *Tmux) NewSplitPaneHorizontal() *TmuxCommand {
+	cmd := TmuxCommand{
+		conf:    t.Config,
+		command: "split-window",
+		params:  []string{"-h"},
+	}
+
+	return &cmd
+}
+
+func (t *Tmux) NewSplitPaneVertical() *TmuxCommand {
+	cmd := TmuxCommand{
+		conf:    t.Config,
+		command: "split-window",
+		params:  []string{"-v"},
+	}
+
+	return &cmd
+}
+
+func (tc *TmuxCommand) SetCWD(path string) *TmuxCommand {
+	tc.params = append(tc.params, "-c", path)
+
+	return tc
+}
+
+func (tc *TmuxCommand) SetEnv(envs map[string]string) *TmuxCommand {
+	return tc
+}
+
+func (tc *TmuxCommand) Execute(programs ...string) error {
+	for _, program := range programs {
+		program = strings.ReplaceAll(program, "'", "\\'")
+	}
+
+	fullParam := append([]string{"-S", tc.conf.TmuxSocketPath, tc.command}, tc.params...)
+
+	fullProgram := ""
+	if len(programs) > 0 {
+		fullProgram = "'" + strings.Join(programs, ";") + "'"
+		fullParam = append(fullParam, fullProgram)
+	}
 
 	cmd := exec.Command("tmux", fullParam...)
 	if err := cmd.Run(); err != nil {
@@ -21,33 +87,4 @@ func (t *Tmux) execCmd(param ...string) error {
 	}
 
 	return nil
-}
-
-
-func (t *Tmux) NewSession(name string) error {
-	return t.execCmd("new-session", "-ds", name)
-}
-
-func (t *Tmux) NewWindow() error {
-	return t.execCmd("new-window")
-}
-
-func (t *Tmux) NewWindowWithCommand(programName string) error {
-	return t.execCmd("new-window", programName)
-}
-
-func (t *Tmux) SplitHorizontal() error {
-	return t.execCmd("split-window", "-h")
-}
-
-func (t *Tmux) SplitHorizontalWithCommand(programName string) error {
-	return t.execCmd("split-window", "-h", programName)
-}
-
-func (t *Tmux) SplitVertical() error {
-	return t.execCmd("split-window", "-v")
-}
-
-func (t *Tmux) SplitVerticalWithCommand(programName string) error {
-	return t.execCmd("split-window", "-v", programName)
 }

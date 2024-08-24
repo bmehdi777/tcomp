@@ -2,9 +2,9 @@
 session: api
 
 before: 
-  - cmd
+  - ls
 stop: 
-  - cmd
+  - ls
 
 env:
   VAR: env
