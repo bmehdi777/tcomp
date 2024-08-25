@@ -2,6 +2,7 @@ package tmux
 
 import (
 	"errors"
+	"os"
 	"os/exec"
 	"strings"
 )
@@ -43,9 +44,9 @@ func (t *Tmux) FollowSession(sessionName string) *TmuxCommand {
 
 func (t *Tmux) KillSession(sessionName string) *TmuxCommand {
 	cmd := TmuxCommand{
-		conf: t.Config,
+		conf:    t.Config,
 		command: "kill-session",
-		params: []string{"-t", sessionName},
+		params:  []string{"-t", sessionName},
 	}
 
 	return &cmd
@@ -96,6 +97,10 @@ func (t *Tmux) NewSplitPaneVertical(sessionName string, windowName string) *Tmux
 }
 
 func (tc *TmuxCommand) SetCWD(path string) *TmuxCommand {
+	if path[0] == '~' {
+		path = strings.Replace(path, "~", os.Getenv("HOME"), 1)
+	}
+
 	tc.params = append(tc.params, "-c", path)
 
 	return tc
@@ -105,6 +110,21 @@ func (tc *TmuxCommand) SetEnv(envs *map[string]string) *TmuxCommand {
 	tc.localEnv = envs
 
 	return tc
+}
+
+func (t *Tmux) SendKey(sessionName string, windowName string, programs ...string) error {
+	fullProgram := ""
+	if len(programs) > 0 {
+		fullProgram = strings.Join(programs, "; ")
+	}
+	fullParam := []string{"-S", t.Config.TmuxSocketPath, "send-keys", "-t", sessionName + ":" + windowName, fullProgram, "Enter"}
+
+	cmd := exec.Command("tmux", fullParam...)
+	if stdoutStderr, err := cmd.CombinedOutput(); err != nil {
+		return errors.New(string(stdoutStderr))
+	}
+
+	return nil
 }
 
 func (tc *TmuxCommand) Execute(programs ...string) error {

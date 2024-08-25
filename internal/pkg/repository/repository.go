@@ -20,16 +20,18 @@ type Repository struct {
 }
 
 type RepoWindow struct {
-	Name     string     `yaml:"name"`               // mandatory
-	Cwd      string     `yaml:"cwd"`                // optional - get current working dir
-	Commands []string   `yaml:"commands,omitempty"` // optional - do nothing
-	Panes    []RepoPane `yaml:"panes,omitempty"`    // optional
+	Name      string     `yaml:"name"`               // mandatory
+	Cwd       string     `yaml:"cwd"`                // optional - get current working dir
+	Commands  []string   `yaml:"commands,omitempty"` // optional - do nothing
+	Panes     []RepoPane `yaml:"panes,omitempty"`    // optional
+	StayAlive bool       `yaml:"stay_alive"`         //optional
 }
 
 type RepoPane struct {
-	Type     RepoPaneType `yaml:"type,omitempty"`     // mandatory
-	Cwd      string       `yaml:"cwd"`                // optional
-	Commands []string     `yaml:"commands,omitempty"` // optional
+	Type      RepoPaneType `yaml:"type,omitempty"`     // mandatory
+	Cwd       string       `yaml:"cwd"`                // optional
+	Commands  []string     `yaml:"commands,omitempty"` // optional
+	StayAlive bool         `yaml:"stay_alive"`         //optional
 }
 
 type RepoPaneType string
@@ -115,13 +117,30 @@ func (repo *Repository) StartTmuxEnv(config *tmux.Config) error {
 			windowCwd = repoWindow.Cwd
 		}
 
+		if repoWindow.StayAlive {
+			// todo: change to current shell used
+			repoWindow.Commands = append(repoWindow.Commands, "zsh")
+		}
+
+		// window already exist when creating session
 		if index == 0 {
 			err := tmux.RenameWindow(repo.Session, "0", repoWindow.Name).Execute()
 			if err != nil {
 				return err
 			}
+
+			// window is already created so if I want to move or execute anything...
+			// todo: find a better solution
+			err = tmux.SendKey(repo.Session, repoWindow.Name, "cd "+windowCwd, "clear")
+			if err != nil {
+				return err
+			}
+			err = tmux.SendKey(repo.Session, repoWindow.Name, repoWindow.Commands...)
+			if err != nil {
+				return err
+			}
 		} else {
-			err := tmux.NewWindow(repo.Session, repoWindow.Name).SetCWD(windowCwd).Execute()
+			err := tmux.NewWindow(repo.Session, repoWindow.Name).SetCWD(windowCwd).Execute(repoWindow.Commands...)
 			if err != nil {
 				return err
 			}
@@ -134,6 +153,11 @@ func (repo *Repository) StartTmuxEnv(config *tmux.Config) error {
 			} else {
 				paneCwd = repoPane.Cwd
 			}
+
+			if repoPane.StayAlive {
+				repoPane.Commands = append(repoPane.Commands, "zsh")
+			}
+
 			if repoPane.Type == Horizontal {
 				err := tmux.NewSplitPaneHorizontal(repo.Session, repoWindow.Name).SetCWD(paneCwd).Execute(repoPane.Commands...)
 				if err != nil {
