@@ -24,14 +24,14 @@ type RepoWindow struct {
 	Cwd       string     `yaml:"cwd"`                // optional - get current working dir
 	Commands  []string   `yaml:"commands,omitempty"` // optional - do nothing
 	Panes     []RepoPane `yaml:"panes,omitempty"`    // optional
-	StayAlive bool       `yaml:"stay_alive"`         //optional
+	KeepAlive bool       `yaml:"keep_alive"`         //optional
 }
 
 type RepoPane struct {
 	Type      RepoPaneType `yaml:"type,omitempty"`     // mandatory
 	Cwd       string       `yaml:"cwd"`                // optional
 	Commands  []string     `yaml:"commands,omitempty"` // optional
-	StayAlive bool         `yaml:"stay_alive"`         //optional
+	KeepAlive bool         `yaml:"keep_alive"`         //optional
 }
 
 type RepoPaneType string
@@ -117,7 +117,7 @@ func (repo *Repository) StartTmuxEnv(config *tmux.Config) error {
 			windowCwd = repoWindow.Cwd
 		}
 
-		if repoWindow.StayAlive {
+		if repoWindow.KeepAlive {
 			// todo: change to current shell used
 			repoWindow.Commands = append(repoWindow.Commands, "zsh")
 		}
@@ -154,7 +154,7 @@ func (repo *Repository) StartTmuxEnv(config *tmux.Config) error {
 				paneCwd = repoPane.Cwd
 			}
 
-			if repoPane.StayAlive {
+			if repoPane.KeepAlive {
 				repoPane.Commands = append(repoPane.Commands, "zsh")
 			}
 
