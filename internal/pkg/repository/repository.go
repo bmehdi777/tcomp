@@ -109,7 +109,31 @@ func (repo *Repository) StartTmuxEnv(config *tmux.Config) error {
 		return err
 	}
 
-	for index, repoWindow := range repo.Windows {
+	repoWindow := repo.Windows[0]
+	var initialWindowCwd string
+	if repoWindow.Cwd == "" {
+		initialWindowCwd = sessionCwd
+	} else {
+		initialWindowCwd = repoWindow.Cwd
+	}
+
+	// creating session actually create a window already
+	err = tmux.RenameWindow(repo.Session, "0", repoWindow.Name).Execute()
+	if err != nil {
+		return err
+	}
+
+	err = tmux.SendKey(repo.Session, repoWindow.Name, "cd "+initialWindowCwd, "clear")
+	if err != nil {
+		return err
+	}
+	err = tmux.SendKey(repo.Session, repoWindow.Name, repoWindow.Commands...)
+	if err != nil {
+		return err
+	}
+
+	// initial window/session should run this too
+	for _, repoWindow := range repo.Windows[1:] {
 		var windowCwd string
 		if repoWindow.Cwd == "" {
 			windowCwd = sessionCwd
@@ -123,27 +147,9 @@ func (repo *Repository) StartTmuxEnv(config *tmux.Config) error {
 		}
 
 		// window already exist when creating session
-		if index == 0 {
-			err := tmux.RenameWindow(repo.Session, "0", repoWindow.Name).Execute()
-			if err != nil {
-				return err
-			}
-
-			// window is already created so if I want to move or execute anything...
-			// todo: find a better solution
-			err = tmux.SendKey(repo.Session, repoWindow.Name, "cd "+windowCwd, "clear")
-			if err != nil {
-				return err
-			}
-			err = tmux.SendKey(repo.Session, repoWindow.Name, repoWindow.Commands...)
-			if err != nil {
-				return err
-			}
-		} else {
-			err := tmux.NewWindow(repo.Session, repoWindow.Name).SetCWD(windowCwd).Execute(repoWindow.Commands...)
-			if err != nil {
-				return err
-			}
+		err := tmux.NewWindow(repo.Session, repoWindow.Name).SetCWD(windowCwd).Execute(repoWindow.Commands...)
+		if err != nil {
+			return err
 		}
 
 		for _, repoPane := range repoWindow.Panes {
@@ -182,6 +188,10 @@ func (repo *Repository) StartTmuxEnv(config *tmux.Config) error {
 
 	return nil
 }
+
+// todo
+func (repoWindow *RepoWindow) toTmux() {}
+func (repoPane *RepoPane) toTmux() {}
 
 func (repo *Repository) StopTmuxEnv(config *tmux.Config) error {
 	tmux := tmux.Tmux{Config: config}

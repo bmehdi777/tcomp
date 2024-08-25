@@ -18,10 +18,10 @@ windows:
       cwd: "."
       panes:
         - type: horizontal
+          keep_alive: true
           commands:
             - ls
-            - zsh
         - type: vertical
+          keep_alive: true
           commands:
             - ls
-            - zsh
