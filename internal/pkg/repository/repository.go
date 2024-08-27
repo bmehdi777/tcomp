@@ -132,51 +132,13 @@ func (repo *Repository) StartTmuxEnv(config *tmux.Config) error {
 		return err
 	}
 
+	for _, repoPanes := range repoWindow.Panes {
+		repoPanes.toTmux(&tmux, repo, &repoWindow, initialWindowCwd)
+	}
+
 	// initial window/session should run this too
 	for _, repoWindow := range repo.Windows[1:] {
-		var windowCwd string
-		if repoWindow.Cwd == "" {
-			windowCwd = sessionCwd
-		} else {
-			windowCwd = repoWindow.Cwd
-		}
-
-		if repoWindow.KeepAlive {
-			// todo: change to current shell used
-			repoWindow.Commands = append(repoWindow.Commands, "zsh")
-		}
-
-		// window already exist when creating session
-		err := tmux.NewWindow(repo.Session, repoWindow.Name).SetCWD(windowCwd).Execute(repoWindow.Commands...)
-		if err != nil {
-			return err
-		}
-
-		for _, repoPane := range repoWindow.Panes {
-			var paneCwd string
-			if repoPane.Cwd == "" {
-				paneCwd = windowCwd
-			} else {
-				paneCwd = repoPane.Cwd
-			}
-
-			if repoPane.KeepAlive {
-				repoPane.Commands = append(repoPane.Commands, "zsh")
-			}
-
-			if repoPane.Type == Horizontal {
-				err := tmux.NewSplitPaneHorizontal(repo.Session, repoWindow.Name).SetCWD(paneCwd).Execute(repoPane.Commands...)
-				if err != nil {
-					return err
-				}
-			} else {
-				err := tmux.NewSplitPaneVertical(repo.Session, repoWindow.Name).SetCWD(paneCwd).Execute(repoPane.Commands...)
-				if err != nil {
-					return err
-				}
-			}
-
-		}
+		repoWindow.toTmux(&tmux, repo, initialWindowCwd)
 	}
 
 	if repo.Follow {
@@ -190,8 +152,57 @@ func (repo *Repository) StartTmuxEnv(config *tmux.Config) error {
 }
 
 // todo
-func (repoWindow *RepoWindow) toTmux() {}
-func (repoPane *RepoPane) toTmux() {}
+func (repoWindow *RepoWindow) toTmux(tmux *tmux.Tmux, repo *Repository, highestCwd string) error {
+	var windowCwd string
+	if repoWindow.Cwd == "" {
+		windowCwd = highestCwd
+	} else {
+		windowCwd = repoWindow.Cwd
+	}
+
+	if repoWindow.KeepAlive {
+		// todo: change to current shell used
+		repoWindow.Commands = append(repoWindow.Commands, "zsh")
+	}
+
+	// window already exist when creating session
+	err := tmux.NewWindow(repo.Session, repoWindow.Name).SetCWD(windowCwd).Execute(repoWindow.Commands...)
+	if err != nil {
+		return err
+	}
+
+	for _, repoPane := range repoWindow.Panes {
+		repoPane.toTmux(tmux, repo, repoWindow, highestCwd)
+	}
+
+	return nil
+}
+func (repoPane *RepoPane) toTmux(tmux *tmux.Tmux, repo *Repository, repoWindow *RepoWindow, highestCwd string) error {
+	var paneCwd string
+	if repoPane.Cwd == "" {
+		paneCwd = highestCwd
+	} else {
+		paneCwd = repoPane.Cwd
+	}
+
+	if repoPane.KeepAlive {
+		repoPane.Commands = append(repoPane.Commands, "zsh")
+	}
+
+	if repoPane.Type == Horizontal {
+		err := tmux.NewSplitPaneHorizontal(repo.Session, repoWindow.Name).SetCWD(paneCwd).Execute(repoPane.Commands...)
+		if err != nil {
+			return err
+		}
+	} else {
+		err := tmux.NewSplitPaneVertical(repo.Session, repoWindow.Name).SetCWD(paneCwd).Execute(repoPane.Commands...)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
 
 func (repo *Repository) StopTmuxEnv(config *tmux.Config) error {
 	tmux := tmux.Tmux{Config: config}
