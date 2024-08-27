@@ -151,7 +151,6 @@ func (repo *Repository) StartTmuxEnv(config *tmux.Config) error {
 	return nil
 }
 
-// todo
 func (repoWindow *RepoWindow) toTmux(tmux *tmux.Tmux, repo *Repository, highestCwd string) error {
 	var windowCwd string
 	if repoWindow.Cwd == "" {
@@ -161,18 +160,19 @@ func (repoWindow *RepoWindow) toTmux(tmux *tmux.Tmux, repo *Repository, highestC
 	}
 
 	if repoWindow.KeepAlive {
-		// todo: change to current shell used
 		repoWindow.Commands = append(repoWindow.Commands, "zsh")
 	}
 
-	// window already exist when creating session
 	err := tmux.NewWindow(repo.Session, repoWindow.Name).SetCWD(windowCwd).Execute(repoWindow.Commands...)
 	if err != nil {
 		return err
 	}
 
 	for _, repoPane := range repoWindow.Panes {
-		repoPane.toTmux(tmux, repo, repoWindow, highestCwd)
+		err = repoPane.toTmux(tmux, repo, repoWindow, highestCwd)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
