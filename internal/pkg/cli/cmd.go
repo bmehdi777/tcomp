@@ -9,7 +9,7 @@ import (
 
 func newCmdRoot() *cobra.Command {
 	rootCmd := cobra.Command{
-		Use:   "tcompose",
+		Use:   "tcomp",
 		Short: "Compose your tmux environment",
 		CompletionOptions: cobra.CompletionOptions{
 			DisableDefaultCmd: true,
@@ -20,6 +20,7 @@ func newCmdRoot() *cobra.Command {
 	rootCmd.AddCommand(newCmdDown())
 	rootCmd.AddCommand(newCmdList())
 	rootCmd.AddCommand(newCmdNew())
+	rootCmd.AddCommand(newCmdVersion())
 
 	return &rootCmd
 }
