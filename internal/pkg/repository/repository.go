@@ -214,3 +214,32 @@ func (repo *Repository) StopTmuxEnv(config *tmux.Config) error {
 
 	return nil
 }
+
+func newDefaultRepository(sessionName string) *Repository {
+	repo := Repository{
+		Session:    sessionName,
+		Before:     []string{""},
+		Stop:       []string{""},
+		Env:        map[string]string{"VAR": "0"},
+		Follow:     true,
+		CwdSession: "./",
+		Windows: []RepoWindow{
+			{
+				Name:      "default_name",
+				Cwd:       "~",
+				Commands:  []string{"echo hello world"},
+				KeepAlive: true,
+				Panes: []RepoPane{
+					{
+						Type:      Horizontal,
+						Cwd:       "./",
+						KeepAlive: true,
+						Commands:  []string{"echo hello world"},
+					},
+				},
+			},
+		},
+	}
+
+	return &repo
+}

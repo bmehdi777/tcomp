@@ -11,11 +11,15 @@ func newCmdRoot() *cobra.Command {
 	rootCmd := cobra.Command{
 		Use:   "tcompose",
 		Short: "Compose your tmux environment",
+		CompletionOptions: cobra.CompletionOptions{
+			DisableDefaultCmd: true,
+		},
 	}
 
 	rootCmd.AddCommand(newCmdUp())
 	rootCmd.AddCommand(newCmdDown())
 	rootCmd.AddCommand(newCmdList())
+	rootCmd.AddCommand(newCmdNew())
 
 	return &rootCmd
 }
