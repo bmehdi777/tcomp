@@ -13,7 +13,7 @@ quickly.
 ### Go
 
 ```sh
-go install github.com/bmehdi777/tcomp
+go install github.com/bmehdi777/tcomp/cmd/tcomp@latest
 ```
 
 ### Manual
