@@ -1,4 +1,4 @@
-package repository
+package workspace
 
 import (
 	"errors"
@@ -13,7 +13,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func ListRepository(config *tmux.Config) ([]string, error) {
+func ListWorkspace(config *tmux.Config) ([]string, error) {
 	files, err := os.ReadDir(config.ComposePath)
 	if err != nil {
 		return nil, err
@@ -30,7 +30,7 @@ func ListRepository(config *tmux.Config) ([]string, error) {
 	return filesNames, nil
 }
 
-func GetFileRepoPath(name string, config *tmux.Config) (string, error) {
+func GetFileWorkspacePath(name string, config *tmux.Config) (string, error) {
 	files, err := os.ReadDir(config.ComposePath)
 	if err != nil {
 		return "", err
@@ -45,10 +45,10 @@ func GetFileRepoPath(name string, config *tmux.Config) (string, error) {
 		}
 	}
 
-	return "", errors.New(fmt.Sprintf("No repository file named `%v` has been found.", name))
+	return "", errors.New(fmt.Sprintf("No workspace file named `%v` has been found.", name))
 }
 
-func CreateNewRepoFile(name string, config *tmux.Config) (string, error) {
+func CreateNewWorkspaceFile(name string, config *tmux.Config) (string, error) {
 	fullPath := path.Join(config.ComposePath, name)
 	fullPath = fullPath + ".yml"
 	_, err := os.Stat(fullPath)
@@ -66,8 +66,8 @@ func CreateNewRepoFile(name string, config *tmux.Config) (string, error) {
 	}
 	defer newFile.Close()
 
-	defaultRepo := newDefaultRepository(name)
-	buf, err := yaml.Marshal(&defaultRepo)
+	defaultWs := newDefaultWorkspace(name)
+	buf, err := yaml.Marshal(&defaultWs)
 	if err != nil {
 		return "", err
 	}
@@ -80,7 +80,7 @@ func CreateNewRepoFile(name string, config *tmux.Config) (string, error) {
 	return fullPath, nil
 }
 
-func OpenRepoFileWithEditor(filepath string, config *tmux.Config) error {
+func OpenWorkspaceFileWithEditor(filepath string, config *tmux.Config) error {
 	editor := os.Getenv("EDITOR")
 	fmt.Println("DEBUG: ", editor)
 

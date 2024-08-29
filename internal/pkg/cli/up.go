@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/bmehdi777/tmuxcompose/internal/pkg/repository"
+	"github.com/bmehdi777/tmuxcompose/internal/pkg/workspace"
 	"github.com/bmehdi777/tmuxcompose/internal/pkg/tmux"
 	"github.com/spf13/cobra"
 )
@@ -40,14 +40,14 @@ func handlerUp(cmd *cobra.Command, args []string) {
 			os.Exit(1)
 		}
 	} else {
-		pathFile, err = repository.GetFileRepoPath(args[0], config)
+		pathFile, err = workspace.GetFileWorkspacePath(args[0], config)
 		checkError(err)
 	}
 
-	repo, err := repository.ReadRepository(pathFile)
+	ws, err := workspace.ReadWorkspace(pathFile)
 
-	err = repo.StartTmuxEnv(config)
+	err = ws.StartTmuxEnv(config)
 	checkError(err)
 
-	fmt.Printf("Session %v is up !", repo.Session)
+	fmt.Printf("Session %v is up !", ws.Session)
 }

@@ -1,4 +1,4 @@
-package repository
+package workspace
 
 import (
 	"errors"
@@ -9,68 +9,68 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type Repository struct {
+type Workspace struct {
 	Session    string            `yaml:"session"`          // mandatory
 	Before     []string          `yaml:"before,omitempty"` // optional
 	Stop       []string          `yaml:"stop,omitempty"`   // optional
 	Env        map[string]string `yaml:"env,omitempty"`    // optional
 	Follow     bool              `yaml:"follow"`           // optional
 	CwdSession string            `yaml:"cwd"`              // optional
-	Windows    []RepoWindow      `yaml:"windows"`          // mandatory
+	Windows    []WorkspaceWindow      `yaml:"windows"`          // mandatory
 }
 
-type RepoWindow struct {
+type WorkspaceWindow struct {
 	Name      string     `yaml:"name"`               // mandatory
 	Cwd       string     `yaml:"cwd"`                // optional - get current working dir
 	Commands  []string   `yaml:"commands,omitempty"` // optional - do nothing
-	Panes     []RepoPane `yaml:"panes,omitempty"`    // optional
+	Panes     []WorkspacePane `yaml:"panes,omitempty"`    // optional
 	KeepAlive bool       `yaml:"keep_alive"`         //optional
 }
 
-type RepoPane struct {
-	Type      RepoPaneType `yaml:"type,omitempty"`     // mandatory
+type WorkspacePane struct {
+	Type      WorkspacePaneType `yaml:"type,omitempty"`     // mandatory
 	Cwd       string       `yaml:"cwd"`                // optional
 	Commands  []string     `yaml:"commands,omitempty"` // optional
 	KeepAlive bool         `yaml:"keep_alive"`         //optional
 }
 
-type RepoPaneType string
+type WorkspacePaneType string
 
 const (
-	Horizontal RepoPaneType = "horizontal"
-	Vertical   RepoPaneType = "vertical"
+	Horizontal WorkspacePaneType = "horizontal"
+	Vertical   WorkspacePaneType = "vertical"
 )
 
-func ReadRepository(pathfile string) (Repository, error) {
-	repo := Repository{}
+func ReadWorkspace(pathfile string) (Workspace, error) {
+	ws := Workspace{}
 	data, err := os.ReadFile(pathfile)
 	if err != nil {
-		return repo, err
+		return ws, err
 	}
 
-	err = yaml.Unmarshal(data, &repo)
+	err = yaml.Unmarshal(data, &ws)
 	if err != nil {
 		fmt.Println("Err :%w")
-		return repo, err
+		return ws, err
 	}
 
-	err = repo.verifyRepository()
+	err = ws.verifyWorkspace()
 	if err != nil {
-		return Repository{}, err
+		return Workspace{}, err
 	}
 
-	return repo, nil
+	return ws, nil
 }
 
-func (repo *Repository) verifyRepository() error {
-	if repo.Session == "" {
+func (ws *Workspace) verifyWorkspace() error {
+	if ws.Session == "" {
 		return errors.New(fmt.Sprintf("`session` is missing."))
 	}
-	if repo.Windows == nil {
+	if ws.Windows == nil {
 		return errors.New(fmt.Sprintf("`windows` is missing."))
 	}
 
-	for indexWindow, window := range repo.Windows {
+	for indexWindow, window := range ws.Windows {
 		if window.Name == "" {
 			return errors.New(fmt.Sprintf("`windows.[%v].name` is missing.", indexWindow))
 		}
@@ -86,63 +86,63 @@ func (repo *Repository) verifyRepository() error {
 	return nil
 }
 
-func (repo *Repository) StartTmuxEnv(config *tmux.Config) error {
+func (ws *Workspace) StartTmuxEnv(config *tmux.Config) error {
 	tmux := tmux.Tmux{Config: config}
 
-	if repo.Env != nil {
-		tmux.Envs = &repo.Env
+	if ws.Env != nil {
+		tmux.Envs = &ws.Env
 	}
 
 	var sessionCwd string
 	var err error
-	if repo.CwdSession == "" {
+	if ws.CwdSession == "" {
 		sessionCwd, err = os.Getwd()
 		if err != nil {
 			return err
 		}
 	} else {
-		sessionCwd = repo.CwdSession
+		sessionCwd = ws.CwdSession
 	}
 
-	err = tmux.NewSession(repo.Session).SetCWD(sessionCwd).Execute()
+	err = tmux.NewSession(ws.Session).SetCWD(sessionCwd).Execute()
 	if err != nil {
 		return err
 	}
 
-	repoWindow := repo.Windows[0]
+	wsWindow := ws.Windows[0]
 	var initialWindowCwd string
-	if repoWindow.Cwd == "" {
+	if wsWindow.Cwd == "" {
 		initialWindowCwd = sessionCwd
 	} else {
-		initialWindowCwd = repoWindow.Cwd
+		initialWindowCwd = wsWindow.Cwd
 	}
 
 	// creating session actually create a window already
-	err = tmux.RenameWindow(repo.Session, "0", repoWindow.Name).Execute()
+	err = tmux.RenameWindow(ws.Session, "0", wsWindow.Name).Execute()
 	if err != nil {
 		return err
 	}
 
-	err = tmux.SendKey(repo.Session, repoWindow.Name, "cd "+initialWindowCwd, "clear")
+	err = tmux.SendKey(ws.Session, wsWindow.Name, "cd "+initialWindowCwd, "clear")
 	if err != nil {
 		return err
 	}
-	err = tmux.SendKey(repo.Session, repoWindow.Name, repoWindow.Commands...)
+	err = tmux.SendKey(ws.Session, wsWindow.Name, wsWindow.Commands...)
 	if err != nil {
 		return err
 	}
 
-	for _, repoPanes := range repoWindow.Panes {
-		repoPanes.toTmux(&tmux, repo, &repoWindow, initialWindowCwd)
+	for _, wsPanes := range wsWindow.Panes {
+		wsPanes.toTmux(&tmux, ws, &wsWindow, initialWindowCwd)
 	}
 
 	// initial window/session should run this too
-	for _, repoWindow := range repo.Windows[1:] {
-		repoWindow.toTmux(&tmux, repo, initialWindowCwd)
+	for _, wsWindow := range ws.Windows[1:] {
+		wsWindow.toTmux(&tmux, ws, initialWindowCwd)
 	}
 
-	if repo.Follow {
-		err := tmux.FollowSession(repo.Session + ":0").Execute()
+	if ws.Follow {
+		err := tmux.FollowSession(ws.Session + ":0").Execute()
 		if err != nil {
 			return err
 		}
@@ -151,25 +151,25 @@ func (repo *Repository) StartTmuxEnv(config *tmux.Config) error {
 	return nil
 }
 
-func (repoWindow *RepoWindow) toTmux(tmux *tmux.Tmux, repo *Repository, highestCwd string) error {
+func (wsWindow *WorkspaceWindow) toTmux(tmux *tmux.Tmux, ws *Workspace, highestCwd string) error {
 	var windowCwd string
-	if repoWindow.Cwd == "" {
+	if wsWindow.Cwd == "" {
 		windowCwd = highestCwd
 	} else {
-		windowCwd = repoWindow.Cwd
+		windowCwd = wsWindow.Cwd
 	}
 
-	if repoWindow.KeepAlive {
-		repoWindow.Commands = append(repoWindow.Commands, "zsh")
+	if wsWindow.KeepAlive {
+		wsWindow.Commands = append(wsWindow.Commands, "zsh")
 	}
 
-	err := tmux.NewWindow(repo.Session, repoWindow.Name).SetCWD(windowCwd).Execute(repoWindow.Commands...)
+	err := tmux.NewWindow(ws.Session, wsWindow.Name).SetCWD(windowCwd).Execute(wsWindow.Commands...)
 	if err != nil {
 		return err
 	}
 
-	for _, repoPane := range repoWindow.Panes {
-		err = repoPane.toTmux(tmux, repo, repoWindow, highestCwd)
+	for _, wsPane := range wsWindow.Panes {
+		err = wsPane.toTmux(tmux, ws, wsWindow, highestCwd)
 		if err != nil {
 			return err
 		}
@@ -177,25 +177,25 @@ func (repoWindow *RepoWindow) toTmux(tmux *tmux.Tmux, repo *Repository, highestC
 
 	return nil
 }
-func (repoPane *RepoPane) toTmux(tmux *tmux.Tmux, repo *Repository, repoWindow *RepoWindow, highestCwd string) error {
+func (wsPane *WorkspacePane) toTmux(tmux *tmux.Tmux, ws *Workspace, wsWindow *WorkspaceWindow, highestCwd string) error {
 	var paneCwd string
-	if repoPane.Cwd == "" {
+	if wsPane.Cwd == "" {
 		paneCwd = highestCwd
 	} else {
-		paneCwd = repoPane.Cwd
+		paneCwd = wsPane.Cwd
 	}
 
-	if repoPane.KeepAlive {
-		repoPane.Commands = append(repoPane.Commands, "zsh")
+	if wsPane.KeepAlive {
+		wsPane.Commands = append(wsPane.Commands, "zsh")
 	}
 
-	if repoPane.Type == Horizontal {
-		err := tmux.NewSplitPaneHorizontal(repo.Session, repoWindow.Name).SetCWD(paneCwd).Execute(repoPane.Commands...)
+	if wsPane.Type == Horizontal {
+		err := tmux.NewSplitPaneHorizontal(ws.Session, wsWindow.Name).SetCWD(paneCwd).Execute(wsPane.Commands...)
 		if err != nil {
 			return err
 		}
 	} else {
-		err := tmux.NewSplitPaneVertical(repo.Session, repoWindow.Name).SetCWD(paneCwd).Execute(repoPane.Commands...)
+		err := tmux.NewSplitPaneVertical(ws.Session, wsWindow.Name).SetCWD(paneCwd).Execute(wsPane.Commands...)
 		if err != nil {
 			return err
 		}
@@ -204,10 +204,10 @@ func (repoPane *RepoPane) toTmux(tmux *tmux.Tmux, repo *Repository, repoWindow *
 	return nil
 }
 
-func (repo *Repository) StopTmuxEnv(config *tmux.Config) error {
+func (ws *Workspace) StopTmuxEnv(config *tmux.Config) error {
 	tmux := tmux.Tmux{Config: config}
 
-	err := tmux.KillSession(repo.Session).Execute()
+	err := tmux.KillSession(ws.Session).Execute()
 	if err != nil {
 		return err
 	}
@@ -215,21 +215,21 @@ func (repo *Repository) StopTmuxEnv(config *tmux.Config) error {
 	return nil
 }
 
-func newDefaultRepository(sessionName string) *Repository {
-	repo := Repository{
+func newDefaultWorkspace(sessionName string) *Workspace {
+	ws := Workspace{
 		Session:    sessionName,
 		Before:     []string{""},
 		Stop:       []string{""},
 		Env:        map[string]string{"VAR": "0"},
 		Follow:     true,
 		CwdSession: "./",
-		Windows: []RepoWindow{
+		Windows: []WorkspaceWindow{
 			{
 				Name:      "default_name",
 				Cwd:       "~",
 				Commands:  []string{"echo hello world"},
 				KeepAlive: true,
-				Panes: []RepoPane{
+				Panes: []WorkspacePane{
 					{
 						Type:      Horizontal,
 						Cwd:       "./",
@@ -241,5 +241,5 @@ func newDefaultRepository(sessionName string) *Repository {
 		},
 	}
 
-	return &repo
+return &ws
 }

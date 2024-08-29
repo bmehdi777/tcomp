@@ -42,7 +42,7 @@ tcomp help
 
 ### list
 
-You can list every repository located in your `$HOME/.config/tcomp/repository/` 
+You can list every workspace located in your `$HOME/.config/tcomp/workspaces/` 
 :
 
 ```sh
@@ -63,35 +63,35 @@ tcomp see
 
 ### new
 
-You can create manually your repository (they are simple yaml files) in your 
-`$HOME/.config/tcomp/repository/` folder but you can also generate them with
+You can create manually your workspace (they are simple yaml files) in your 
+`$HOME/.config/tcomp/workspaces/` folder but you can also generate them with
 `tcomp` : 
 
 
 ```sh
-tcomp new <REPOSITORY_NAME>
+tcomp new <WORKSPACE_NAME>
 ```
 
 ### up
 
 ```sh
-tcomp up <REPOSITORY_NAME>
+tcomp up <WORKSPACE_NAME>
 ```
 
 or 
 
 ```sh
-tcomp up -f <PATH_TO_REPOSITORY>
+tcomp up -f <PATH_TO_WORKSPACE>
 ```
 
 ### down
 
 ```sh
-tcomp down <REPOSITORY_NAME>
+tcomp down <WORKSPACE_NAME>
 ```
 
 or 
 
 ```sh
-tcomp down -f <PATH_TO_REPOSITORY>
+tcomp down -f <PATH_TO_WORKSPACE>
 ```

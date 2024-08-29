@@ -10,7 +10,7 @@ import (
 
 type Config struct {
 	TmuxSocketPath string `mapstructure:"tmux_socket_path"`
-	ComposePath    string `mapstructure:"compose_repository"`
+	ComposePath    string `mapstructure:"compose_workspaces"`
 }
 
 func NewConfig() (*Config, error) {
@@ -39,22 +39,20 @@ func NewConfig() (*Config, error) {
 }
 
 func createDefaultConfig() error {
-	fmt.Println("Create initial config")
 	configPath := filepath.Join(os.Getenv("HOME"), ".config/tcomp")
 	err := os.MkdirAll(configPath, os.ModePerm)
 	if err != nil {
 		return err
 	}
 
-	repoPath := filepath.Join(configPath, "repository/")
-	err = os.MkdirAll(repoPath, os.ModePerm)
+	wsPath := filepath.Join(configPath, "workspaces/")
+	err = os.MkdirAll(wsPath, os.ModePerm)
 	if err != nil {
 		return err
 	}
 
 	viper.Set("tmux_socket_path", "/tmp/tmux-1000/default")
-	viper.Set("compose_repository", filepath.Join(configPath, "/repository"))
-	fmt.Println("test")
+	viper.Set("compose_workspaces", filepath.Join(configPath, "/workspaces"))
 	viper.SafeWriteConfig()
 	return nil
 }

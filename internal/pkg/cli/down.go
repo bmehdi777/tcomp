@@ -5,20 +5,20 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/bmehdi777/tmuxcompose/internal/pkg/repository"
 	"github.com/bmehdi777/tmuxcompose/internal/pkg/tmux"
+	"github.com/bmehdi777/tmuxcompose/internal/pkg/workspace"
 	"github.com/spf13/cobra"
 )
 
 func newCmdDown() *cobra.Command {
 	downCmd := cobra.Command{
-		Use:   "down [REPOSITORY]",
+		Use:   "down [WORKSPACE]",
 		Short: "Stop your tmux environment",
 		Run:   handlerDown,
 		Args:  cobra.RangeArgs(0, 1),
 	}
 
-	downCmd.PersistentFlags().StringP("file", "f", "", "Path to the repository's file")
+	downCmd.PersistentFlags().StringP("file", "f", "", "Path to the workspace's file")
 
 	return &downCmd
 }
@@ -41,15 +41,15 @@ func handlerDown(cmd *cobra.Command, args []string) {
 			os.Exit(1)
 		}
 	} else {
-		pathFile, err = repository.GetFileRepoPath(args[0], config)
+		pathFile, err = workspace.GetFileWorkspacePath(args[0], config)
 		checkError(err)
 	}
 
-	repo, err := repository.ReadRepository(pathFile)
+	ws, err := workspace.ReadWorkspace(pathFile)
 	checkError(err)
 
-	err = repo.StopTmuxEnv(config)
+	err = ws.StopTmuxEnv(config)
 	checkError(err)
 
-	fmt.Printf("Session %v is down.", repo.Session)
+	fmt.Printf("Session %v is down.", ws.Session)
 }
