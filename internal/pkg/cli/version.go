@@ -19,6 +19,4 @@ func newCmdVersion() *cobra.Command {
 func handlerVersion(cmd *cobra.Command, args []string) {
 	versionInfo := version.Get()
 	fmt.Println("Version : ", versionInfo.Version)
-	fmt.Println("Commit : ", versionInfo.GitCommit)
-	fmt.Println("Build date : ", versionInfo.BuildDate)
 }
