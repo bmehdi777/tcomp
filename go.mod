@@ -1,4 +1,4 @@
-module github.com/bmehdi777/tmuxcompose
+module github.com/bmehdi777/tcomp
 
 go 1.22.6
 

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/bmehdi777/tmuxcompose/internal/pkg/cli"
+	"github.com/bmehdi777/tcomp/internal/pkg/cli"
 )
 
 func main() {

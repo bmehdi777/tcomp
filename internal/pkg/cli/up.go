@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/bmehdi777/tmuxcompose/internal/pkg/workspace"
-	"github.com/bmehdi777/tmuxcompose/internal/pkg/tmux"
+	"github.com/bmehdi777/tcomp/internal/pkg/tmux"
+	"github.com/bmehdi777/tcomp/internal/pkg/workspace"
 	"github.com/spf13/cobra"
 )
 

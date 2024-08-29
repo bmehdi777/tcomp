@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/bmehdi777/tmuxcompose/internal/pkg/tmux"
+	"github.com/bmehdi777/tcomp/internal/pkg/tmux"
 	"gopkg.in/yaml.v3"
 )
 
@@ -16,22 +16,22 @@ type Workspace struct {
 	Env        map[string]string `yaml:"env,omitempty"`    // optional
 	Follow     bool              `yaml:"follow"`           // optional
 	CwdSession string            `yaml:"cwd"`              // optional
-	Windows    []WorkspaceWindow      `yaml:"windows"`          // mandatory
+	Windows    []WorkspaceWindow `yaml:"windows"`          // mandatory
 }
 
 type WorkspaceWindow struct {
-	Name      string     `yaml:"name"`               // mandatory
-	Cwd       string     `yaml:"cwd"`                // optional - get current working dir
-	Commands  []string   `yaml:"commands,omitempty"` // optional - do nothing
+	Name      string          `yaml:"name"`               // mandatory
+	Cwd       string          `yaml:"cwd"`                // optional - get current working dir
+	Commands  []string        `yaml:"commands,omitempty"` // optional - do nothing
 	Panes     []WorkspacePane `yaml:"panes,omitempty"`    // optional
-	KeepAlive bool       `yaml:"keep_alive"`         //optional
+	KeepAlive bool            `yaml:"keep_alive"`         //optional
 }
 
 type WorkspacePane struct {
 	Type      WorkspacePaneType `yaml:"type,omitempty"`     // mandatory
-	Cwd       string       `yaml:"cwd"`                // optional
-	Commands  []string     `yaml:"commands,omitempty"` // optional
-	KeepAlive bool         `yaml:"keep_alive"`         //optional
+	Cwd       string            `yaml:"cwd"`                // optional
+	Commands  []string          `yaml:"commands,omitempty"` // optional
+	KeepAlive bool              `yaml:"keep_alive"`         //optional
 }
 
 type WorkspacePaneType string
@@ -241,5 +241,5 @@ func newDefaultWorkspace(sessionName string) *Workspace {
 		},
 	}
 
-return &ws
+	return &ws
 }

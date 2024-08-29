@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/bmehdi777/tmuxcompose/internal/pkg/tmux"
+	"github.com/bmehdi777/tcomp/internal/pkg/tmux"
 	"gopkg.in/yaml.v3"
 )
 
