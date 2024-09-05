@@ -28,5 +28,5 @@ func handlerNew(cmd *cobra.Command, args []string) {
 	checkError(err)
 
 	workspace.OpenWorkspaceFileWithEditor(filePath, config)
-	fmt.Printf("Successfully created %v workspace !", args[0])
+	fmt.Printf("Successfully created %v workspace !\n", args[0])
 }
