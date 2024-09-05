@@ -82,7 +82,6 @@ func CreateNewWorkspaceFile(name string, config *tmux.Config) (string, error) {
 
 func OpenWorkspaceFileWithEditor(filepath string, config *tmux.Config) error {
 	editor := os.Getenv("EDITOR")
-	fmt.Println("DEBUG: ", editor)
 
 	cmd := exec.Command(editor, filepath)
 	cmd.Stdin = os.Stdin
