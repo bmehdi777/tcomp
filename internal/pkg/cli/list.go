@@ -25,5 +25,9 @@ func handlerList(cmd *cobra.Command, args []string) {
 	checkError(err)
 
 	listName, err := workspace.ListWorkspace(config)
-	fmt.Printf("List of workspace files :\n%v\n", strings.Join(listName, "\n"))
+	if len(listName) > 0 {
+		fmt.Printf("List of workspace files :\n%v\n", strings.Join(listName, "\n"))
+	} else {
+		fmt.Printf("No workspace.\nSee `tcomp new <WORKSPACE>` to create a new one.\n")
+	}
 }
