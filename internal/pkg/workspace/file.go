@@ -51,13 +51,9 @@ func GetFileWorkspacePath(name string, config *tmux.Config) (string, error) {
 func CreateNewWorkspaceFile(name string, config *tmux.Config) (string, error) {
 	fullPath := path.Join(config.ComposePath, name)
 	fullPath = fullPath + ".yml"
-	_, err := os.Stat(fullPath)
 
-	if err == nil {
-		if errors.Is(err, os.ErrExist) {
-			return "", errors.New("File already exist.")
-		}
-		return "", err
+	if _, err := os.Stat(fullPath); err == nil {
+		return "", errors.New("File already exist.")
 	}
 
 	newFile, err := os.Create(fullPath)
@@ -78,6 +74,23 @@ func CreateNewWorkspaceFile(name string, config *tmux.Config) (string, error) {
 	}
 
 	return fullPath, nil
+}
+
+func RemoveWorkspaceFile(name string, config *tmux.Config) error {
+	fullPath := path.Join(config.ComposePath, name)
+	fullPath = fullPath + ".yml"
+	_, err := os.Stat(fullPath)
+
+	if _, err := os.Stat(fullPath); err != nil {
+		return errors.New("File doesn't exist")
+	}
+
+	err = os.Remove(fullPath)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func OpenWorkspaceFileWithEditor(filepath string, config *tmux.Config) error {

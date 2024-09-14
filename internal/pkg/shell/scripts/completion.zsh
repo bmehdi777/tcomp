@@ -1,6 +1,6 @@
 _tcomp_show_workspace_files() {
 	list_files=""
-	for file in ~/.config/tcomp/workspaces/*.yml;
+	for file in $HOME/.config/tcomp/workspaces/*.yml;
 	do
 		filename=$(basename $file | cut -d. -f1)
 		list_files="${list_files} ${filename}"
@@ -22,6 +22,7 @@ _tcomp_completion() {
 			'down:shutdown a tcomp workspace'
 			'ls:list all workspaces'
 			'new:create a new workspace'
+			'rm:remove a workspace'
 			'version:show version'
 			'help:see help'
 		)
@@ -29,7 +30,7 @@ _tcomp_completion() {
 		;;
 	(args)
 		case $line[1] in
-			(up|down)
+			(up|down|remove|rm|delete|del)
 				_arguments "1: :($(_tcomp_show_workspace_files))"
 				;;
 		esac
