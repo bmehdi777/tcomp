@@ -1,6 +1,6 @@
 _tcomp_show_workspace_files() {
 	list_files=""
-	for file in ~/.config/tcomp/workspaces/*.yml;
+	for file in $HOME/.config/tcomp/workspaces/*.yml;
 	do
 		filename=$(basename $file | cut -d. -f1)
 		list_files="${list_files} ${filename}"
